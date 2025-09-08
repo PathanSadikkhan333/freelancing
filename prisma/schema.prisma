@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  role           Role      @default(FREELANCER)
+  bio            String?
+  skills         String[]  @default([])
+  portfolio      Json?     // array of projects
+  avatarUrl      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  jobs           Job[]          @relation("EmployerJobs")
+  application    Application[]
+  sentMessages   Message[]      @relation("SentMessages")
+  receivedMessages Message[]    @relation("ReceivedMessages")
+  reviewsGiven   Review[]       @relation("ReviewerRelation")
+  reviewsReceived Review[]      @relation("RevieweeRelation")
+// payments       Payment[]
+}
+
+enum Role {
+  FREELANCER
+  Employer
+}
+
+model Job {
+  id            String       @id @default(cuid())
+  title         String
+  description   String
+  budgetMin     Int
+  budgetMax     Int
+  skills        String[]     @default([])
+  employerId    String
+  employer      User         @relation("EmployerJobs", fields: [employerId], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  applications  Application[]
+  status        JobStatus    @default(OPEN)
+}
+
+enum JobStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Application {
+  id            String           @id @default(cuid())
+  jobId         String
+  job           Job              @relation(fields: [jobId], references: [id])
+  freelancerId  String
+  freelancer    User             @relation(fields: [freelancerId], references: [id])
+  coverLetter   String?
+  price         Int
+  status        ApplicationStatus @default(PENDING)
+  createdAt     DateTime         @default(now())
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
+
+model Message {
+  id           String    @id @default(cuid())
+  senderId     String
+  sender       User      @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId   String
+  receiver     User      @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  text         String
+  createdAt    DateTime  @default(now())
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  jobId       String?
+  amount      Int
+  currency    String        @default("INR")
+  status      PaymentStatus @default(PENDING)
+  providerRef String?
+  createdAt   DateTime      @default(now())
+}
+
+enum PaymentStatus {
+  PENDING
+  ESCROWED
+  RELEASED
+  REFUNDED
+}
+
+model Review {
+  id          String    @id @default(cuid())
+
+  reviewerId  String
+  reviewer    User      @relation("ReviewerRelation", fields: [reviewerId], references: [id])
+
+  revieweeId  String
+  reviewee    User      @relation("RevieweeRelation", fields: [revieweeId], references: [id])
+
+  rating      Int
+  text        String?
+  createdAt   DateTime  @default(now())
+}

@@ -1,0 +1,13 @@
+@import "tailwindcss/preflight";
+@tailwind utilities;
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  background: #2563eb;
+  color: white;
+  border-radius: 6px;
+}
