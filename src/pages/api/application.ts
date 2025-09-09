@@ -10,6 +10,7 @@ export default async function handler(req:NextApiRequest,res:NextApiResponse){
     }
     res.status(405).end()
 }
+<<<<<<< HEAD
     */
 
 import { NextApiRequest, NextApiResponse } from "next";
@@ -38,5 +39,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error) {
     console.error("API error:", error);
     res.status(500).json({ error: "Internal Server Error" });
+=======
+
+*/
+
+import { NextApiRequest, NextApiResponse } from "next";
+import { prisma } from "../../lib/prisma";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  const { jobId, freelancerId, coverLetter, price } = req.body;
+
+  if (!jobId || !freelancerId || !price) {
+    return res.status(400).json({ error: "Missing required fields: jobId, freelancerId, or price" });
+  }
+
+  try {
+    const application = await prisma.application.create({
+      data: {
+        jobId,
+        freelancerId,
+        coverLetter, // optional, included if provided
+        price,
+      },
+    });
+
+    return res.status(201).json(application);
+  } catch (error) {
+    console.error("Failed to create application:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+>>>>>>> 5f89c89cb0f0338191579c843d24d79e05ee9172
   }
 }
